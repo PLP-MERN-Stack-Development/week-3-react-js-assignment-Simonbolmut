@@ -1,0 +1,173 @@
+
+1. Initialize via Vite + React
+bash
+Copy
+Edit
+npm create vite@latest my-app -- --template react
+cd my-app
+npm install
+medium.com
+
+2. Install & configure Tailwind CSS
+bash
+Copy
+Edit
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+Update tailwind.config.js to scan JSX files:
+
+js
+Copy
+Edit
+export default {
+  content: ["./index.html","./src/**/*.{js,ts,jsx,tsx}"],
+  theme: { extend: {} },
+  plugins: [],
+};
+In src/index.css, add:
+
+css
+Copy
+Edit
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+Then import it in main.jsx or index.jsx. 
+youtube.com
++8
+v3.tailwindcss.com
++8
+medium.com
++8
+
+3. Organize folders
+css
+Copy
+Edit
+src/
+  components/
+  pages/
+  hooks/
+  layouts/
+  utils/
+4. Install React Router
+bash
+Copy
+Edit
+npm install react-router-dom
+In App.jsx, wrap with:
+
+jsx
+Copy
+Edit
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+<BrowserRouter>
+  <Layout>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/tasks" element={<TaskManager />} />
+      {/* other routes */}
+    </Routes>
+  </Layout>
+</BrowserRouter>
+⚙️ Task 2: Component Architecture
+Basic reusable components
+jsx
+Copy
+Edit
+// Button.jsx
+export default function Button({ variant = "primary", children, ...props }) {
+  const base = "px-4 py-2 rounded";
+  const styles = {
+    primary: "bg-blue-500 text-white hover:bg-blue-600",
+    secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
+    danger: "bg-red-500 text-white hover:bg-red-600",
+  };
+  return <button className={`${base} ${styles[variant]}`} {...props}>{children}</button>;
+}
+jsx
+Copy
+Edit
+// Card.jsx
+export default function Card({ children }) {
+  return <div className="border rounded-lg p-4 shadow">{children}</div>;
+}
+jsx
+Copy
+Edit
+// Navbar.jsx, Footer.jsx => use Tailwind utility classes for layout
+// Layout.jsx
+export default function Layout({ children }) {
+  return (
+    <>
+      <Navbar />
+      <main className="container mx-auto p-4">{children}</main>
+      <Footer />
+    </>
+  );
+}
+🔁 Task 3: State & Hooks
+TaskManager component
+Holds tasks in state
+
+Add, delete, toggle complete
+
+Filter (all, active, completed)
+
+Custom useLocalStorage hook
+jsx
+Copy
+Edit
+// src/hooks/useLocalStorage.js
+import { useState, useEffect } from "react";
+
+export default function useLocalStorage(key, defaultValue) {
+  const [value, setValue] = useState(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue];
+}
+linkedin.com
+usehooks-ts.com
+
+Wrap the app in ThemeContext using useContext for light/dark mode.
+
+🌐 Task 4: API Integration
+Use JSONPlaceholder:
+
+jsx
+Copy
+Edit
+useEffect(() => {
+  setLoading(true);
+  fetch("https://jsonplaceholder.typicode.com/posts?_page=1&_limit=10")
+    .then(res => res.json())
+    .then(data => setItems(data))
+    .catch(err => setError(err))
+    .finally(() => setLoading(false));
+}, [page]);
+Implement search via query &q=term, support pagination or infinite scroll. Show loading spinners and error messages.
+
+✨ Task 5: Tailwind Styling & Theming
+Use mobile-first utility classes: sm:, md:, lg: prefixes.
+
+Implement dark mode:
+
+In tailwind.config.js: darkMode: "class"
+
+Toggle document.documentElement.classList.add("dark") when theme changes.
+
+Style: bg-white dark:bg-gray-800, text-gray-800 dark:text-gray-200
+
+Add transitions/animations: e.g., transition, duration-300, and use @keyframes via Tailwind config or plugin.
